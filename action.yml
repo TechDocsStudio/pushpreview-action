@@ -1,0 +1,18 @@
+name: "pushpreview-action"
+description: "Preview changes on every pull-request"
+inputs:
+  source-directory:
+    description: 'The directory to compress and preview.'
+    required: true
+  github-token:
+    description: 'The secret token of GitHub.'
+    required: true
+  pushpreview-token:
+    description: 'The secret token for the PushPreview API.'
+    required: true
+outputs:
+  comment:
+    description: "PushPreview comment with the preview URL."
+runs:
+  using: 'node20'
+  main: "index.js"
