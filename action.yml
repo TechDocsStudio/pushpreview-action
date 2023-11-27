@@ -1,5 +1,8 @@
 name: "pushpreview-action"
 description: "Preview changes on every pull-request"
+branding:
+  color: green
+  icon: 'git-pull-request'
 inputs:
   source-directory:
     description: 'The directory to compress and preview.'
