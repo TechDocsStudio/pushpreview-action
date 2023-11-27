@@ -1,5 +1,5 @@
-name: "pushpreview-action"
-description: "Preview changes on every pull-request"
+name: "PushPreview Action"
+description: "Preview changes on every pull-request on PushPreview platform"
 branding:
   color: green
   icon: 'git-pull-request'
