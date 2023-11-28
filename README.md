@@ -37,22 +37,34 @@ The action uses the following secrets:
 Below is an example of how to use the `push-preview-action` in a workflow:
 
 ```yaml
-name: Generate PushPreview
+name: PushPreview
 
-on: [push]
-
+on:
+  issue_comment:
+    types:
+      - created
 jobs:
-  build:
+
+  comment:
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'issue_comment' && github.event.comment.body == '/preview'
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3          
 
-    - name: Create Push Preview
-      uses: PushLabsHQ/pushpreview-action@v1
-      with:
-        source-directory: './path-to-your-directory'
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        pushpreview-token: ${{ secrets.PUSHPREVIEW_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Install dependencies
+        run: cd docs && yarn install --frozen-lockfile
+      
+      - name: Build website
+        run: cd docs && yarn build
+
+      - name: Generate preview
+        uses: PushLabsHQ/pushpreview-action@1.0.0
+        with:
+          source-directory: ./docs/build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pushpreview-token: ${{ secrets.PUSHPREVIEW_TOKEN }}
 ```
