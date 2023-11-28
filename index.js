@@ -75,8 +75,6 @@ async function main() {
         const sourceDir = core.getInput("source-directory");
         console.log(sourceDir);
 
-        await postComment("⚙️ Hang tight! PushPreview is currently building your preview. We'll share the URL as soon as it's ready. ");
-
         if (!fs.existsSync(sourceDir)) {
             const errorMessage = `The source directory "${sourceDir}" does not exist.`;
             await postComment(`Workflow failed with the following error: ${errorMessage}`);
