@@ -20,24 +20,21 @@ async function postComment(message) {
             body: message
         });
     } catch (error) {
-        console.error(`Failed to post comment: ${message}`, error);
+        core.setFailed(`Failed to post comment: ${error.message}`);
     }
 }
 
 function createZip(sourceDir) {
     return new Promise((resolve, reject) => {
-        const archive = archiver("zip", { zlib: { level: 9 } });
         const output = fs.createWriteStream(`file.zip`);
+        const archive = archiver("zip", { zlib: { level: 9 } });
 
-        archive.directory(sourceDir, false);
-        archive.pipe(output);
+        archive
+            .directory(sourceDir, false)
+            .pipe(output)
+            .on('close', () => resolve())
+            .on('error', reject);
 
-        output.on('close', () => {
-            console.log(`Successfully created file.zip`);
-            resolve();
-        });
-
-        archive.on('error', reject);
         archive.finalize();
     });
 }
@@ -61,18 +58,14 @@ async function sendZipToExternalAPI() {
             }
         });
 
-        console.log("Response from API:", response.data);
         return response.data.previewUrl;
     } catch (error) {
-        console.error(error);
+        const errorMessage = error.response?.status === 500 
+            ? "🚨 Error: Internal server error. Please try again later."
+            : `🚨 Error: ${error.message.error}`;
 
-        if (error.response && error.response.status === 500) {
-            await postComment("🚨 There was an internal server error. Please try again later.");
-        } else {
-            await postComment(`Pus failed with the following error: ${error.message}`);
-        }
-
-        core.setFailed(error.message);
+        await postComment(errorMessage);
+        core.setFailed(errorMessage);
         return null;
     }
 }
@@ -80,7 +73,6 @@ async function sendZipToExternalAPI() {
 async function main() {
     if (context.payload.issue.pull_request) {
         const sourceDir = core.getInput("source-directory");
-        console.log(sourceDir);
 
         if (!fs.existsSync(sourceDir)) {
             const errorMessage = `The source directory "${sourceDir}" does not exist.`;
