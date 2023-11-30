@@ -65,6 +65,13 @@ async function sendZipToExternalAPI() {
         return response.data.previewUrl;
     } catch (error) {
         console.error(error);
+
+        if (error.response && error.response.status === 500) {
+            await postComment("🚨 There was an internal server error. Please try again later.");
+        } else {
+            await postComment(`Pus failed with the following error: ${error.message}`);
+        }
+
         core.setFailed(error.message);
         return null;
     }
