@@ -60,9 +60,19 @@ async function sendZipToExternalAPI() {
 
         return response.data.previewUrl;
     } catch (error) {
-        const errorMessage = error.response?.status === 500 
-            ? "🚨 Error: Internal server error. Please try again later."
-            : `🚨 Error: ${error.message.error}`;
+        
+        let errorMessage;
+        switch (error.response.status) {
+            case 403:
+                errorMessage = "🚨 Error: Invalid API key or team not found. Please verify your credentials.";
+                break;
+            case 500:
+                errorMessage = "🚨 Error: Internal server error. Please try again later.";
+                break;
+            default:
+                errorMessage = `🚨 Error: ${error.message.error}`;
+                break;
+        }
 
         await postComment(errorMessage);
         core.setFailed(errorMessage);
