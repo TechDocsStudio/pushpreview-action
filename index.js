@@ -6,7 +6,15 @@ const axios = require("axios");
 
 const context = github.context;
 const { owner, repo } = context.repo;
-const { number } = context.payload.issue;
+
+if (context.payload.pull_request) {
+    number = context.payload.pull_request.number;
+} else if (context.payload.issue) {
+    number = context.payload.issue.number;
+} else {
+    core.setFailed("No pull request or issue found in the payload.");
+    return;
+}
 
 async function postComment(message) {
     try {
@@ -81,26 +89,25 @@ async function sendZipToExternalAPI() {
 }
 
 async function main() {
-    if (context.payload.issue.pull_request) {
-        const sourceDir = core.getInput("source-directory");
+    const sourceDir = core.getInput("source-directory");
+    console.log(sourceDir);
 
-        if (!fs.existsSync(sourceDir)) {
-            const errorMessage = `The source directory "${sourceDir}" does not exist.`;
-            await postComment(`Workflow failed with the following error: ${errorMessage}`);
-            core.setFailed(errorMessage);
-            return;
-        }
+    if (!fs.existsSync(sourceDir)) {
+        const errorMessage = `The source directory "${sourceDir}" does not exist.`;
+        await postComment(`Workflow failed with the following error: ${errorMessage}`);
+        core.setFailed(errorMessage);
+        return;
+    }
 
-        try {
-            await createZip(sourceDir);
-            const previewUrl = await sendZipToExternalAPI();
-            if (previewUrl) {
-                await postComment(`🎉 Success! Your live preview is now available. Check it out here: ${previewUrl}`);
-            }
-        } catch (error) {
-            await postComment(`Workflow failed with the following error: ${error.message}`);
-            core.setFailed(error.message);
+    try {
+        await createZip(sourceDir);
+        const previewUrl = await sendZipToExternalAPI();
+        if (previewUrl) {
+            await postComment(`🎉 Success! Your live preview is now available. Check it out here: ${previewUrl}`);
         }
+    } catch (error) {
+        await postComment(`Workflow failed with the following error: ${error.message}`);
+        core.setFailed(error.message);
     }
 }
 
