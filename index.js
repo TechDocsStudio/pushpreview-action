@@ -71,17 +71,22 @@ async function sendZipToExternalAPI() {
         
         let errorMessage;
         switch (error.response.status) {
+            case 401:
+                errorMessage = "🚨 Error: Invalid API key or team not found. Please verify your credentials.";
+                break;
+            case 402:
+                errorMessage = "🚨 Error: Preview limit reached. Upgrade your plan at pushpreview.com for additional previews and features.";
+                break;
             case 403:
                 errorMessage = "🚨 Error: Invalid API key or team not found. Please verify your credentials.";
                 break;
-            case 500:
-                errorMessage = "🚨 Error: Internal server error. Please try again later.";
+            case 413:
+                errorMessage = "🚨 Error: The preview exceeds the MB limit. Upgrade your plan at pushpreview.com for higher limits and additional features.";
                 break;
             default:
-                errorMessage = `🚨 Error: ${error.message.error}`;
+                errorMessage = "🚨 Error: Internal server error. Please try again later.";
                 break;
         }
-
         await postComment(errorMessage);
         core.setFailed(errorMessage);
         return null;
