@@ -45,7 +45,7 @@ Below is an example of how to use the `push-preview-action` in a workflow:
            yarn build
 
        - name: Generate preview
-         uses: PushLabsHQ/pushpreview-action@1.0.6
+         uses: TechDocsStudio/pushpreview-action@1.0.6
          with:
            # Replace with your docs output directory
            source-directory: ./docs/build
